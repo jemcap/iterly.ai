@@ -71,7 +71,7 @@ model Task {
   id          String @id @default(cuid())
   title       String
   description String
-  status      String @default("todo") // todo, in_progress, done
+  status      String @default("todo") // backlog, todo, in_progress, in_review, blocked, done
   priority    String @default("medium") // low, medium, high
   
   // Relations

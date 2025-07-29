@@ -20,8 +20,11 @@ export async function GET() {
 
     // Group by status for Kanban board
     const tasksByStatus = {
+      backlog: tasks.filter(task => task.status === 'backlog'),
       todo: tasks.filter(task => task.status === 'todo'),
       in_progress: tasks.filter(task => task.status === 'in_progress'),
+      in_review: tasks.filter(task => task.status === 'in_review'),
+      blocked: tasks.filter(task => task.status === 'blocked'),
       done: tasks.filter(task => task.status === 'done')
     };
 
