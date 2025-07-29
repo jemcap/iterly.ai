@@ -22,7 +22,6 @@ function processCommentWithNLP(content: string) {
   ];
   const lowKeywords = [
     "nice to have",
-    "maybe",
     "could be better",
     "optional",
     "suggestion",

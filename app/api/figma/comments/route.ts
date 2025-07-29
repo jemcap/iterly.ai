@@ -25,6 +25,14 @@ const mockFigmaComments = [
     nodeId: "loading_spinner",
     timestamp: new Date().toISOString(),
   },
+  {
+    id: "comment_4",
+    content:
+      "Loading video is broken. Please fix the playback controls.",
+    author: "QA Team",
+    nodeId: "loading_video",
+    timestamp: new Date().toISOString(),
+  },
 ];
 export async function POST(req: Request) {
   try {
