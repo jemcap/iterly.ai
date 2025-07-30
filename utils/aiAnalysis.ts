@@ -26,12 +26,12 @@ Rules:
 - false: General encouragement, personal comments, off-topic discussion, social chatter
 
 Examples:
-- "Great work!" → false
-- "Let's go team!" → false  
-- "The button is too small" → true
-- "This color doesn't work" → true
-- "Looking good so far" → false
-- "Can we make this responsive?" → true`;
+- "Great work!" -> false
+- "Let's go team!" -> false  
+- "The button is too small" -> true
+- "This color doesn't work" -> true
+- "Looking good so far" -> false
+- "Can we make this responsive?" -> true`;
 
     const response = await model.chat.completions.create({
       model: "gpt-4o-mini",
@@ -59,7 +59,7 @@ function isCommentActionableQuick(content: string): boolean {
     /^(great|good|nice|awesome|excellent|perfect|amazing|love it|looks good|looking good)[\s!.]*$/,
     
     // Social/personal comments
-    /^(hi|hello|hey|thanks|thank you|lol|haha|😀|😊|👍|🎉|💪)[\s!.]*$/,
+    /^(hi|hello|hey|thanks|thank you|lol|haha)[\s!.]*$/,
     
     // Short exclamations
     /^(yes|no|ok|okay|sure|cool|neat|sweet)[\s!.]*$/,
@@ -77,7 +77,7 @@ function isCommentActionableQuick(content: string): boolean {
   // Check if comment matches non-actionable patterns
   for (const pattern of nonActionablePatterns) {
     if (pattern.test(lowerContent)) {
-      console.log(`🚫 Quick filter: "${content}" matches non-actionable pattern`);
+      console.log(`Quick filter: "${content}" matches non-actionable pattern`);
       return false;
     }
   }
@@ -125,11 +125,11 @@ export async function analyseFeedback(
     const isActionable = await isCommentActionable(content);
     
     if (!isActionable) {
-      console.log(`⏭️  Skipping non-actionable comment: "${content.substring(0, 50)}..."`);
+      console.log(`Skipping non-actionable comment: "${content.substring(0, 50)}..."`);
       return null; // Return null for non-actionable comments
     }
 
-    console.log(`✅ Comment is actionable, proceeding with AI analysis: "${content.substring(0, 50)}..."`);
+    console.log(`Comment is actionable, proceeding with AI analysis: "${content.substring(0, 50)}..."`);
 
     const systemPrompt = `You are an expert product manager and design systems analyst with over 20 years of experience in the field, and have worked and managed several teams in agile methodologies. Your job is to analyze design feedback and convert it into actionable tasks for developers.
     
@@ -173,7 +173,7 @@ export async function analyseFeedback(
 
     Return only the JSON response, do not include any additional text or explanations.`;
 
-    console.log("🔍 Analyzing feedback with AI model...");
+    console.log("Analyzing feedback with AI model...");
     const response = await model.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -200,7 +200,7 @@ export async function analyseFeedback(
     if (!analysis || typeof analysis !== "object") {
       throw new Error("AI model did not return a valid analysis object");
     }
-    console.log("✅ Analysis complete:", analysis);
+    console.log("Analysis complete:", analysis);
 
     // Parse the analysis result (assuming it's in JSON format)
     return analysis;
@@ -210,12 +210,12 @@ export async function analyseFeedback(
     // Check if comment is actionable before falling back
     const isActionable = isCommentActionableQuick(content);
     if (!isActionable) {
-      console.log(`⏭️  Skipping non-actionable comment in fallback: "${content.substring(0, 50)}..."`);
+      console.log(`Skipping non-actionable comment in fallback: "${content.substring(0, 50)}..."`);
       return null;
     }
     
     // Use fallback only for actionable comments
-    console.log("🔄 Using keyword-based fallback for actionable comment");
+    console.log("Using keyword-based fallback for actionable comment");
     return keywordAnalysisFallback(content);
   }
 }

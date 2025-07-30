@@ -46,7 +46,7 @@ This is an AI-powered design feedback management system that processes Figma com
 - `/api/debug` - Development debugging endpoints
 
 ### Task Status Flow
-Tasks progress through: `backlog` → `todo` → `in_progress` → `in_review` → `blocked` → `done`
+Tasks progress through: `backlog` -> `todo` -> `in_progress` -> `in_review` -> `blocked` -> `done`
 
 ### AI Analysis Structure
 Each task includes AI-generated metadata:

@@ -23,7 +23,7 @@ export default function Home() {
           </Link>
           
           <div className="text-sm text-gray-500">
-            <p>PoC Pipeline: Figma Comments → NLP Analysis → Task Board</p>
+            <p>PoC Pipeline: Figma Comments {'->'} NLP Analysis {'->'} Task Board</p>
           </div>
         </div>
       </div>

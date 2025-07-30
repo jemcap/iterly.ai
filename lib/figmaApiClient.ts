@@ -52,7 +52,7 @@ export function extractFileKeyFromUrl(figmaUrl: string): string | null {
   // Clean the URL first - remove backslashes and decode
   let cleanUrl = figmaUrl.replace(/\\/g, '').trim();
   
-  console.log(`🔧 Cleaning URL: ${figmaUrl} → ${cleanUrl}`);
+  console.log(`Cleaning URL: ${figmaUrl} -> ${cleanUrl}`);
   
   // Handle various Figma URL formats:
   // https://www.figma.com/file/ABC123/File-Name

@@ -1,8 +1,22 @@
 import { prisma } from "@/lib/prismaClient";
 import { getFigmaClient, extractFileKeyFromUrl } from '@/lib/figmaApiClient';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req: Request) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user || !(session as any).user?.id) {
+      return Response.json(
+        { error: "Unauthorized - Please sign in" }, 
+        { status: 401 }
+      );
+    }
+
+    const userId = (session as any).user.id;
+
     const body = await req.json();
     console.log('📝 Received request body:', body);
     
@@ -39,13 +53,16 @@ export async function POST(req: Request) {
       where: { figmaFileId: figmaFileId }
     });
 
-    // Get current user (for now, use the existing test user)
+    // Get current authenticated user
     const uploader = await prisma.user.findUnique({
-      where: { email: "designer@example.com" }
+      where: { id: userId }
     });
 
     if (!uploader) {
-      throw new Error("No user found");
+      return Response.json(
+        { error: "User not found" }, 
+        { status: 404 }
+      );
     }
 
     // Get Figma client and fetch real data
@@ -93,6 +110,7 @@ export async function POST(req: Request) {
             content: comment.message,
             figmaNodeId: comment.client_meta?.node_id?.[0] || null,
             authorId: uploader.id, // In real app, map Figma user to your user
+            userId: userId, // Link feedback to the authenticated user who imported it
             designFileId: designFile.id,
             isProcessed: false
           }

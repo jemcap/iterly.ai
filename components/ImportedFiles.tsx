@@ -86,7 +86,7 @@ const ImportedFiles = ({ refreshTrigger }: ImportedFilesProps) => {
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"
               >
-                View in Figma →
+                View in Figma
               </a>
             </div>
           ))}

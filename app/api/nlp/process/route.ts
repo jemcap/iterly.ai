@@ -1,11 +1,28 @@
 import { prisma } from "@/lib/prismaClient";
 import { analyseFeedback } from "@/utils/aiAnalysis";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST() {
   try {
-    // Get unprocessed feedback
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user || !(session as any).user?.id) {
+      return Response.json(
+        { error: "Unauthorized - Please sign in" }, 
+        { status: 401 }
+      );
+    }
+
+    const userId = (session as any).user.id;
+
+    // Get unprocessed feedback for the authenticated user
     const unprocessedFeedback = await prisma.feedback.findMany({
-      where: { isProcessed: false },
+      where: { 
+        isProcessed: false,
+        userId: userId // Only process feedback for the current user
+      },
       include: {
         author: true,
         designFile: true,
@@ -80,14 +97,15 @@ export async function POST() {
 📋 Category: ${analysis.category}
 🎯 Action Type: ${analysis.actionType}
 ⏱️ Estimated Effort: ${analysis.estimatedEffort}
-💡 Developer Notes: ${analysis.devNotes}
+Developer Notes: ${analysis.devNotes}
 
-🗣️ Original Feedback: "${feedback.content}"
+Original Feedback: "${feedback.content}"
 
-🤖 AI Reasoning: ${analysis.reasoning}`,
+AI Reasoning: ${analysis.reasoning}`,
             priority: analysis.priority,
             status: "backlog",
             feedbackId: feedback.id,
+            assigneeId: userId, // Assign task to the authenticated user
           },
         });
 
