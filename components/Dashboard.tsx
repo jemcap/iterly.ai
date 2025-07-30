@@ -14,6 +14,9 @@ import {
 import { TasksData, Task } from "@/types/taskType";
 import TaskColumn from "./TaskColumn";
 import TaskCard from "./TaskCard";
+import FigmaImport from "./FigmaImport";
+import ImportedFiles from "./ImportedFiles";
+import Header from "./Header";
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState<TasksData | null>(null);
@@ -21,6 +24,7 @@ const Dashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
@@ -134,55 +138,68 @@ const Dashboard = () => {
   // Render without DnD during SSR to prevent hydration mismatch
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-full">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Design Feedback Dashboard
-          </h1>
-          <div className="overflow-x-auto">
-            <div className="flex flex-row gap-6 min-w-max">
-              <TaskColumn
-                id="backlog"
-                title="Backlog"
-                tasks={tasks.backlog}
-                bgColor="bg-blue-50"
-                borderColor="border-blue-200"
-              />
-              <TaskColumn
-                id="todo"
-                title="To Do"
-                tasks={tasks.todo}
-                bgColor="bg-blue-50"
-                borderColor="border-blue-200"
-              />
-              <TaskColumn
-                id="in_progress"
-                title="In Progress"
-                tasks={tasks.in_progress}
-                bgColor="bg-yellow-50"
-                borderColor="border-yellow-200"
-              />
-              <TaskColumn
-                id="in_review"
-                title="In Review"
-                tasks={tasks.in_review}
-                bgColor="bg-yellow-50"
-                borderColor="border-yellow-200"
-              />
-              <TaskColumn
-                id="blocked"
-                title="Blocked"
-                tasks={tasks.blocked}
-                bgColor="bg-red-50"
-                borderColor="border-red-200"
-              />
-              <TaskColumn
-                id="done"
-                title="Done"
-                tasks={tasks.done}
-                bgColor="bg-green-50"
-                borderColor="border-green-200"
-              />
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="p-8">
+          <div className="max-w-full">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">
+              Design Feedback Dashboard
+            </h1>
+
+            <FigmaImport
+              onImportSuccess={() => {
+                fetchTasks();
+                setRefreshTrigger((prev) => prev + 1);
+              }}
+            />
+
+            <ImportedFiles refreshTrigger={refreshTrigger} />
+
+            <div className="overflow-x-auto">
+              <div className="flex flex-row gap-6 min-w-max">
+                <TaskColumn
+                  id="backlog"
+                  title="Backlog"
+                  tasks={tasks.backlog}
+                  bgColor="bg-blue-50"
+                  borderColor="border-blue-200"
+                />
+                <TaskColumn
+                  id="todo"
+                  title="To Do"
+                  tasks={tasks.todo}
+                  bgColor="bg-blue-50"
+                  borderColor="border-blue-200"
+                />
+                <TaskColumn
+                  id="in_progress"
+                  title="In Progress"
+                  tasks={tasks.in_progress}
+                  bgColor="bg-yellow-50"
+                  borderColor="border-yellow-200"
+                />
+                <TaskColumn
+                  id="in_review"
+                  title="In Review"
+                  tasks={tasks.in_review}
+                  bgColor="bg-yellow-50"
+                  borderColor="border-yellow-200"
+                />
+                <TaskColumn
+                  id="blocked"
+                  title="Blocked"
+                  tasks={tasks.blocked}
+                  bgColor="bg-red-50"
+                  borderColor="border-red-200"
+                />
+                <TaskColumn
+                  id="done"
+                  title="Done"
+                  tasks={tasks.done}
+                  bgColor="bg-green-50"
+                  borderColor="border-green-200"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -191,74 +208,86 @@ const Dashboard = () => {
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-full">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Design Feedback Dashboard
-          </h1>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="p-8">
+          <div className="max-w-full">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">
+              Design Feedback Dashboard
+            </h1>
 
-          <div className="overflow-x-auto">
-            <div className="flex flex-row gap-6 min-w-max">
-              <TaskColumn
-                id="backlog"
-                title="Backlog"
-                tasks={tasks.backlog}
-                bgColor="bg-blue-50"
-                borderColor="border-blue-200"
-              />
-              <TaskColumn
-                id="todo"
-                title="To Do"
-                tasks={tasks.todo}
-                bgColor="bg-blue-50"
-                borderColor="border-blue-200"
-              />
-              <TaskColumn
-                id="in_progress"
-                title="In Progress"
-                tasks={tasks.in_progress}
-                bgColor="bg-yellow-50"
-                borderColor="border-yellow-200"
-              />
-              <TaskColumn
-                id="in_review"
-                title="In Review"
-                tasks={tasks.in_review}
-                bgColor="bg-yellow-50"
-                borderColor="border-yellow-200"
-              />
-              <TaskColumn
-                id="blocked"
-                title="Blocked"
-                tasks={tasks.blocked}
-                bgColor="bg-red-50"
-                borderColor="border-red-200"
-              />
-              <TaskColumn
-                id="done"
-                title="Done"
-                tasks={tasks.done}
-                bgColor="bg-green-50"
-                borderColor="border-green-200"
-              />
+            <FigmaImport
+              onImportSuccess={() => {
+                fetchTasks();
+                setRefreshTrigger((prev) => prev + 1);
+              }}
+            />
+
+            <ImportedFiles refreshTrigger={refreshTrigger} />
+
+            <div className="overflow-x-auto">
+              <div className="flex flex-row gap-6 min-w-max">
+                <TaskColumn
+                  id="backlog"
+                  title="Backlog"
+                  tasks={tasks.backlog}
+                  bgColor="bg-blue-50"
+                  borderColor="border-blue-200"
+                />
+                <TaskColumn
+                  id="todo"
+                  title="To Do"
+                  tasks={tasks.todo}
+                  bgColor="bg-blue-50"
+                  borderColor="border-blue-200"
+                />
+                <TaskColumn
+                  id="in_progress"
+                  title="In Progress"
+                  tasks={tasks.in_progress}
+                  bgColor="bg-yellow-50"
+                  borderColor="border-yellow-200"
+                />
+                <TaskColumn
+                  id="in_review"
+                  title="In Review"
+                  tasks={tasks.in_review}
+                  bgColor="bg-yellow-50"
+                  borderColor="border-yellow-200"
+                />
+                <TaskColumn
+                  id="blocked"
+                  title="Blocked"
+                  tasks={tasks.blocked}
+                  bgColor="bg-red-50"
+                  borderColor="border-red-200"
+                />
+                <TaskColumn
+                  id="done"
+                  title="Done"
+                  tasks={tasks.done}
+                  bgColor="bg-green-50"
+                  borderColor="border-green-200"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <DragOverlay>
-        {activeTask ? (
-          <div className="rotate-3 opacity-90">
-            <TaskCard task={activeTask} />
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+        <DragOverlay>
+          {activeTask ? (
+            <div className="rotate-3 opacity-90">
+              <TaskCard task={activeTask} />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
   );
 };
 
