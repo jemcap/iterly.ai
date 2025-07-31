@@ -25,9 +25,16 @@ const ImportedFiles = ({ refreshTrigger }: ImportedFilesProps) => {
       if (response.ok) {
         const data = await response.json();
         setFiles(data.files || []);
+      } else if (response.status === 401) {
+        // User is not authenticated - this is expected, just return empty files
+        setFiles([]);
+      } else {
+        console.error("Failed to fetch design files:", response.statusText);
+        setFiles([]);
       }
     } catch (error) {
       console.error("Failed to fetch design files:", error);
+      setFiles([]);
     } finally {
       setLoading(false);
     }

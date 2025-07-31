@@ -1,8 +1,25 @@
 import { prisma } from "@/lib/prismaClient";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET() {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user || !('id' in session.user) || !session.user.id) {
+      return Response.json(
+        { error: "Unauthorized - Please sign in" }, 
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id as string;
+
     const files = await prisma.designFile.findMany({
+      where: {
+        uploadedById: userId
+      },
       include: {
         feedback: {
           select: {
