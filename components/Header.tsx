@@ -69,7 +69,6 @@ const Header = ({
     title: "Iterly.ai",
     url: "/",
   },
-  menu = [{ title: "Home", url: "#" }],
   auth = {
     login: { title: "Login", url: "/auth/login" },
     signup: { title: "Sign up", url: "/auth/register" },
@@ -129,18 +128,7 @@ const Header = ({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard" className="cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/profile" className="cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </Link>
-            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleSignOut}
@@ -177,13 +165,6 @@ const Header = ({
                 {logo.title}
               </span>
             </a>
-            <div className="flex items-center">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  {menu.map((item) => renderMenuItem(item))}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
           </div>
           {renderAuthSection()}
         </nav>
@@ -210,14 +191,6 @@ const Header = ({
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-6 p-4">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-4"
-                  >
-                    {menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
-
                   <div className="flex flex-col gap-3">
                     <Button asChild variant="outline">
                       <a href={auth.login.url}>{auth.login.title}</a>
