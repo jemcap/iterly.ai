@@ -17,19 +17,167 @@ import TaskCard from "./TaskCard";
 import FigmaImport from "./FigmaImport";
 import ImportedFiles from "./ImportedFiles";
 import Header from "./Header";
+import ProcessingIndicator from "./ProcessingIndicator";
+import { useEventStream } from "@/hooks/useEventStream";
+import { useSession } from "next-auth/react";
 
 const Dashboard = () => {
+  const { data: session } = useSession();
+  const { isConnected, addEventListener } = useEventStream();
+  
   const [tasks, setTasks] = useState<TasksData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Real-time processing state
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState<{
+    current: number;
+    total: number;
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
     fetchTasks();
   }, []);
+
+  // Set up real-time event listeners
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const cleanupFunctions: (() => void)[] = [];
+
+    // Listen for processing start
+    cleanupFunctions.push(
+      addEventListener('processing_started', (event) => {
+        console.log('🔄 Processing started:', event);
+        setIsProcessing(true);
+        setProcessingProgress({
+          current: 0,
+          total: event.totalFeedback || 0,
+          message: event.message || 'Starting processing...'
+        });
+      })
+    );
+
+    // Listen for processing progress
+    cleanupFunctions.push(
+      addEventListener('processing_progress', (event) => {
+        console.log('📊 Processing progress:', event);
+        setProcessingProgress({
+          current: event.current || 0,
+          total: event.total || 0,
+          message: event.message || `Processing ${event.current}/${event.total}...`
+        });
+      })
+    );
+
+    // Listen for new tasks being created
+    cleanupFunctions.push(
+      addEventListener('task_created', (event) => {
+        console.log('✅ Dashboard - New task created event received:', event);
+        console.log('✅ Dashboard - Task data:', event.task);
+        
+        // Add new task to the tasks state
+        setTasks(prevTasks => {
+          console.log('✅ Dashboard - Previous tasks state:', prevTasks);
+          
+          if (!prevTasks) {
+            console.log('✅ Dashboard - No previous tasks, initializing with new task');
+            const status = event.task.status || 'backlog';
+            return {
+              backlog: status === 'backlog' ? [event.task] : [],
+              todo: status === 'todo' ? [event.task] : [],
+              in_progress: status === 'in_progress' ? [event.task] : [],
+              in_review: status === 'in_review' ? [event.task] : [],
+              blocked: status === 'blocked' ? [event.task] : [],
+              done: status === 'done' ? [event.task] : [],
+            };
+          }
+          
+          const newTask = {
+            ...event.task,
+            // Ensure the task matches the expected structure
+            feedback: event.task.feedback || {
+              author: { name: 'Unknown', email: 'unknown@example.com' },
+              designFile: { name: 'Unknown' }
+            },
+            createdAt: new Date(event.task.createdAt || new Date()),
+          };
+          
+          const updatedTasks = { ...prevTasks };
+          
+          // Add to backlog by default (or use the task's status)
+          const status = newTask.status || 'backlog';
+          console.log('✅ Dashboard - Adding task to status:', status);
+          console.log('✅ Dashboard - Current tasks in', status, ':', updatedTasks[status as keyof TasksData]?.length || 0);
+          
+          // Ensure the status column exists and is an array
+          if (!updatedTasks[status as keyof TasksData]) {
+            updatedTasks[status as keyof TasksData] = [];
+          }
+          
+          updatedTasks[status as keyof TasksData] = [
+            ...updatedTasks[status as keyof TasksData],
+            newTask
+          ];
+          
+          console.log('✅ Dashboard - Updated tasks in', status, ':', updatedTasks[status as keyof TasksData].length);
+          console.log('✅ Dashboard - New task added:', newTask.title);
+          
+          return updatedTasks;
+        });
+
+        // Update progress
+        if (event.progress) {
+          setProcessingProgress({
+            current: event.progress.current,
+            total: event.progress.total,
+            message: `Created task ${event.progress.tasksCreated}: "${event.task.title}"`
+          });
+        }
+      })
+    );
+
+    // Listen for processing completion
+    cleanupFunctions.push(
+      addEventListener('processing_completed', (event) => {
+        console.log('🎉 Processing completed:', event);
+        setIsProcessing(false);
+        setProcessingProgress(null);
+        
+        // Show completion message briefly
+        setTimeout(() => {
+          setError(null);
+        }, 3000);
+      })
+    );
+
+    // Listen for task skips
+    cleanupFunctions.push(
+      addEventListener('task_skipped', (event) => {
+        console.log('⏭️ Task skipped:', event);
+        // Optionally show skipped feedback in UI
+      })
+    );
+
+    // Listen for processing errors
+    cleanupFunctions.push(
+      addEventListener('processing_error', (event) => {
+        console.error('❌ Processing error:', event);
+        setError(`Error processing comment: ${event.error}`);
+      })
+    );
+
+    // Cleanup on unmount
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup());
+    };
+  }, [session?.user, addEventListener]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -142,15 +290,23 @@ const Dashboard = () => {
         <Header />
         <div className="p-8">
           <div className="max-w-full">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">
-              Design Feedback Dashboard
-            </h1>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">
+                Design Feedback Dashboard
+              </h1>
+
+            </div>
 
             <FigmaImport
               onImportSuccess={() => {
                 fetchTasks();
                 setRefreshTrigger((prev) => prev + 1);
               }}
+            />
+
+            <ProcessingIndicator 
+              isProcessing={isProcessing}
+              progress={processingProgress}
             />
 
             <ImportedFiles refreshTrigger={refreshTrigger} />
@@ -217,15 +373,23 @@ const Dashboard = () => {
       >
         <div className="p-8">
           <div className="max-w-full">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">
-              Design Feedback Dashboard
-            </h1>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">
+                Design Feedback Dashboard
+              </h1>
+
+            </div>
 
             <FigmaImport
               onImportSuccess={() => {
                 fetchTasks();
                 setRefreshTrigger((prev) => prev + 1);
               }}
+            />
+
+            <ProcessingIndicator 
+              isProcessing={isProcessing}
+              progress={processingProgress}
             />
 
             <ImportedFiles refreshTrigger={refreshTrigger} />
