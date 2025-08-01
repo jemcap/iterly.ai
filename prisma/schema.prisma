@@ -84,9 +84,10 @@ model DesignFile {
 
 // Raw feedback from Figma comments
 model Feedback {
-  id          String  @id @default(cuid())
-  content     String
-  figmaNodeId String? // Specific node/frame in Figma
+  id             String  @id @default(cuid())
+  content        String
+  figmaCommentId String? // Original Figma comment ID for uniqueness
+  figmaNodeId    String? // Specific node/frame in Figma
 
   // AI Processing
   isProcessed Boolean @default(false)

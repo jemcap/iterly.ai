@@ -96,11 +96,13 @@ export async function POST(req: Request) {
         continue;
       }
       
-      // Check if comment already exists in our database
+      // Check if comment already exists for this specific user and design file
+      // Use Figma comment ID for true uniqueness per user
       const existingFeedback = await prisma.feedback.findFirst({
         where: {
-          content: comment.message,
-          designFileId: designFile.id
+          figmaCommentId: comment.id,
+          designFileId: designFile.id,
+          userId: userId // Make comments user-specific
         }
       });
 
@@ -108,6 +110,7 @@ export async function POST(req: Request) {
         const feedback = await prisma.feedback.create({
           data: {
             content: comment.message,
+            figmaCommentId: comment.id, // Store original Figma comment ID
             figmaNodeId: comment.client_meta?.node_id?.[0] || null,
             authorId: uploader.id, // In real app, map Figma user to your user
             userId: userId, // Link feedback to the authenticated user who imported it

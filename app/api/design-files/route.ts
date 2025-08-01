@@ -16,12 +16,20 @@ export async function GET() {
 
     const userId = session.user.id as string;
 
+    // Find design files that have feedback from the current user
     const files = await prisma.designFile.findMany({
       where: {
-        uploadedById: userId
+        feedback: {
+          some: {
+            userId: userId // Files that have at least one feedback from current user
+          }
+        }
       },
       include: {
         feedback: {
+          where: {
+            userId: userId // Only count feedback from the current user
+          },
           select: {
             id: true
           }
@@ -37,7 +45,7 @@ export async function GET() {
       name: file.name,
       figmaFileUrl: file.figmaFileUrl,
       createdAt: file.createdAt.toISOString(),
-      feedbackCount: file.feedback.length
+      feedbackCount: file.feedback.length // Now this counts only user's feedback
     }));
 
     return Response.json({
