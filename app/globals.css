@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@layer utilities {
+  .align-elements {
+    @apply mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

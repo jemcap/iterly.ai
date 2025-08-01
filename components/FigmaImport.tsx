@@ -52,7 +52,11 @@ const FigmaImport = ({ onImportSuccess }: FigmaImportProps) => {
         
         if (processData.success) {
           setSuccess(prev => 
-            `${prev}. AI processing complete: ${processData.processedCount} tasks generated.`
+            `${prev}. AI processing complete: ${processData.tasks.length} tasks generated.`
+          );
+        } else {
+          setSuccess(prev => 
+            `${prev}. AI processing failed: ${processData.error || 'Unknown error'}`
           );
         }
 

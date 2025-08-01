@@ -209,7 +209,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
