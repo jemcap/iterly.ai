@@ -88,31 +88,31 @@ const Header = ({
 
   // Handle Sign Out function
   const handleSignOut = async () => {
-    // Check if current user is a guest user
+    // Automatically clean up data for guest users on logout
     if (session?.user?.email === "guest@user.com") {
-      const confirmCleanup = window.confirm(
-        "As a guest user, would you like to delete all your test data before signing out? This action cannot be undone."
-      );
-      
-      if (confirmCleanup) {
-        try {
-          // Clean up guest data before signing out
-          const response = await fetch("/api/auth/guest/cleanup", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          
-          if (response.ok) {
-            console.log("Guest data cleaned successfully");
-          }
-        } catch (error) {
-          console.error("Error cleaning guest data:", error);
+      console.log("[Header] Starting guest cleanup for user:", session.user.email);
+      try {
+        // Clean up guest data before signing out
+        const response = await fetch("/api/auth/guest/cleanup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          console.log("[Header] Guest data cleaned successfully:", data);
+        } else {
+          console.error("[Header] Failed to clean guest data:", data);
         }
+      } catch (error) {
+        console.error("[Header] Error cleaning guest data:", error);
       }
     }
     
+    console.log("[Header] Signing out user");
     await signOut({ callbackUrl: "/" });
   };
 

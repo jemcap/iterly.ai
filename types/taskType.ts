@@ -5,13 +5,17 @@ export interface Task {
   priority: "low" | "medium" | "high";
   status: "backlog" | "todo" | "in_progress" | "in_review" | "blocked" | "done";
   createdAt: Date;
+  updatedAt: Date;
   feedback: {
     author: {
       name: string;
       email: string;
     };
+    createdAt: Date;
+    text: string;
     designFile: {
       name: string;
+      url: string;
     };
   };
   // Add AI analysis fields

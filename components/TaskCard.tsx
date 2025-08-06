@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 
 interface TaskCardProps {
   task: Task;
+  onClick?: () => void;
 }
 
-function TaskCard({ task }: TaskCardProps) {
+function TaskCard({ task, onClick }: TaskCardProps) {
   const [isMounted, setIsMounted] = useState(false);
   
   useEffect(() => {
@@ -83,7 +84,10 @@ function TaskCard({ task }: TaskCardProps) {
   // During SSR, render without drag functionality
   if (!isMounted) {
     return (
-      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+      <div 
+        className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+        onClick={onClick}
+      >
         {/* Header with title and priority */}
         <div className="flex justify-between items-start mb-3">
           <h3 className="font-medium text-gray-900 text-sm leading-tight flex-1 mr-2">
@@ -145,12 +149,23 @@ function TaskCard({ task }: TaskCardProps) {
           )}
         </div>
 
-        <div className="mt-2 text-xs text-gray-400">
-          {new Date(task.createdAt).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          })}
+        <div className="mt-2 flex justify-between items-center">
+          <span className="text-xs text-gray-400">
+            {new Date(task.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })}
+          </span>
+          <button 
+            className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick?.();
+            }}
+          >
+            View Details →
+          </button>
         </div>
       </div>
     );
@@ -167,6 +182,10 @@ function TaskCard({ task }: TaskCardProps) {
         transition-all duration-200 cursor-grab active:cursor-grabbing
         ${isDragging ? 'opacity-50 rotate-2 shadow-xl z-50' : ''}
       `}
+      onClick={(e) => {
+        if (e.defaultPrevented) return;
+        onClick?.();
+      }}
     >
       {/* Header with title and priority */}
       <div className="flex justify-between items-start mb-3">
@@ -234,12 +253,25 @@ function TaskCard({ task }: TaskCardProps) {
         )}
       </div>
 
-      <div className="mt-2 text-xs text-gray-400">
-        {new Date(task.createdAt).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        })}
+      <div className="mt-2 flex justify-between items-center">
+        <span className="text-xs text-gray-400">
+          {new Date(task.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })}
+        </span>
+        <button 
+          className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onClick?.();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          View Details →
+        </button>
       </div>
     </div>
   );

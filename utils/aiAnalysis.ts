@@ -5,15 +5,12 @@ const model = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "",
 });
 
-// Pre-filter function to determine if a comment is actionable
+
 async function isCommentActionable(content: string): Promise<boolean> {
-  // Stage 1: Quick rule-based filtering (no AI cost)
   const quickFilter = isCommentActionableQuick(content);
   if (!quickFilter) {
     return false;
   }
-
-  // Stage 2: AI-powered validation for edge cases
   try {
     const prompt = `Analyze if this comment contains actionable feedback for UI/UX development:
 
@@ -37,7 +34,7 @@ Examples:
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 10,
-      temperature: 0.1 // Very low temperature for consistent binary decisions
+      temperature: 0.1 
     });
 
     const result = response.choices[0].message.content?.toLowerCase().trim();
@@ -45,15 +42,14 @@ Examples:
 
   } catch (error) {
     console.warn("AI filtering failed, using quick filter result:", error);
-    return quickFilter; // Fallback to rule-based result
+    return quickFilter; 
   }
 }
 
-// Fast rule-based pre-filtering (no API cost)
+
 function isCommentActionableQuick(content: string): boolean {
   const lowerContent = content.toLowerCase().trim();
-  
-  // Filter out obviously non-actionable patterns
+
   const nonActionablePatterns = [
     // Encouragement/praise only
     /^(great|good|nice|awesome|excellent|perfect|amazing|love it|looks good|looking good)[\s!.]*$/,
